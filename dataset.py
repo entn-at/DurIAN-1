@@ -28,8 +28,8 @@ class DNNDataset(Dataset):
         D = np.load(os.path.join(hparams.alignment_path, str(idx)+".npy"))
 
         character = self.text[idx][0:len(self.text[idx])-1]
-        character = np.array(text_to_sequence(
-            character, hparams.text_cleaners))
+        character = np.array(text_to_sequence(character,
+                                              hparams.text_cleaners))
 
         sample = {"text": character, "duration": D,
                   "mel_target": mel_gt_target}
