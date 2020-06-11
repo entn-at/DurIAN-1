@@ -34,6 +34,7 @@ position_dim = 32
 # Train
 checkpoint_path = "./model_new"
 logger_path = "./logger"
+mel_ground_truth = "./mels"
 
 batch_size = 32
 epochs = 1000
