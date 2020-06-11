@@ -89,7 +89,7 @@ def main(args):
                 mel_target = torch.from_numpy(db["mel_target"])
                 mel_target = mel_target.float().to(device)
                 prev_mel = F.pad(mel_target, (0, 0, 1, 0, 0, 0))[:, :-1, :]
-                D = torch.from_numpy(db["D"]).int().to(device)
+                D = torch.from_numpy(db["duration"]).int().to(device)
                 mel_pos = torch.from_numpy(db["mel_pos"]).long().to(device)
                 src_pos = torch.from_numpy(db["src_pos"]).long().to(device)
                 max_mel_len = db["mel_max_len"]

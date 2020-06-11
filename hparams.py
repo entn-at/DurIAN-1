@@ -12,6 +12,7 @@ max_iters = 20000
 signal_normalization = True
 griffin_lim_iters = 60
 power = 1.5
+text_cleaners = ['english_cleaners']
 
 
 # TTS-DNN
@@ -35,6 +36,7 @@ position_dim = 32
 checkpoint_path = "./model_new"
 logger_path = "./logger"
 mel_ground_truth = "./mels"
+alignment_path = "./alignments"
 
 batch_size = 32
 epochs = 1000

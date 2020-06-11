@@ -1,41 +1,38 @@
 import torch
 from torch.nn import functional as F
 from torch.utils.data import Dataset, DataLoader
-
 import numpy as np
 import math
 import os
 
 import hparams
-import audio
+from text import text_to_sequence
 from utils import process_text, pad_1D, pad_2D
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 class DNNDataset(Dataset):
+    """ LJSpeech """
+
     def __init__(self):
-        self.metadata = process_data()
+        self.text = process_text(os.path.join("data", "train.txt"))
 
     def __len__(self):
-        return len(self.metadata)
+        return len(self.text)
 
     def __getitem__(self, idx):
-        mel_gt_name = self.metadata[idx][2]
-        mel_gt_target = np.load(
-            "/apdcephfs/share_1213607/zhxliu/DURIAN/durian.daji"+mel_gt_name[1:])[:3000, :]
-        character = np.load(
-            "/apdcephfs/share_1213607/zhxliu/DURIAN/durian.daji"+self.metadata[idx][4][1:])
-        frame_ind = np.load(
-            "/apdcephfs/share_1213607/zhxliu/DURIAN/durian.daji/"+self.metadata[idx][5][1:])
-        D = [0 for i in range(character.shape[0])]
-        for ind in frame_ind:
-            D[ind] += 1
-        D = np.array(D)
+        mel_gt_name = os.path.join(
+            hparams.mel_ground_truth, "ljspeech-mel-%05d.npy" % (idx+1))
+        mel_gt_target = np.load(mel_gt_name)
+        D = np.load(os.path.join(hparams.alignment_path, str(idx)+".npy"))
 
-        sample = {"text": character,
-                  "mel_target": mel_gt_target,
-                  "D": D}
+        character = self.text[idx][0:len(self.text[idx])-1]
+        character = np.array(text_to_sequence(
+            character, hparams.text_cleaners))
+
+        sample = {"text": character, "duration": D,
+                  "mel_target": mel_gt_target}
 
         return sample
 
@@ -43,7 +40,7 @@ class DNNDataset(Dataset):
 def reprocess(batch, cut_list):
     texts = [batch[ind]["text"] for ind in cut_list]
     mel_targets = [batch[ind]["mel_target"] for ind in cut_list]
-    Ds = [batch[ind]["D"] for ind in cut_list]
+    Ds = [batch[ind]["duration"] for ind in cut_list]
 
     length_text = np.array([])
     for text in texts:
@@ -73,7 +70,7 @@ def reprocess(batch, cut_list):
 
     out = {"text": texts,
            "mel_target": mel_targets,
-           "D": Ds,
+           "duration": Ds,
            "mel_pos": mel_pos,
            "src_pos": src_pos,
            "mel_max_len": max_mel_len}
@@ -96,17 +93,3 @@ def collate_fn(batch):
         output.append(reprocess(batch, cut_list[i]))
 
     return output
-
-
-def process_data(mode="train"):
-    metadata_filename = os.path.join(
-        "/apdcephfs/share_1213607/zhxliu/DURIAN/durian.daji/linear_multi", "full.txt")
-
-    with open(metadata_filename, encoding='utf-8') as f:
-        metadata = [line.strip().split('|') for line in f]
-        hours = sum((int(x[3]) for x in metadata)) * \
-            hparams.frame_shift_ms / (3600 * 1000)
-        print('Loaded metadata for %d examples (%.2f hours)' %
-              (len(metadata), hours))
-
-    return metadata
