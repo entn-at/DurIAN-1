@@ -11,6 +11,7 @@ class DNNLoss(nn.Module):
         mel_target.requires_grad = False
         mel_loss = self.l1_loss(mel, mel_target)
         mel_postnet_loss = self.l1_loss(mel_postnet, mel_target)
+
         duration_predictor_target.requires_grad = False
         duration_predictor_loss = self.l1_loss(duration_predicted,
                                                duration_predictor_target.float())

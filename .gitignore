@@ -112,3 +112,4 @@ data/train.txt
 
 mels
 alignments
+gen.py
