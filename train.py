@@ -11,7 +11,7 @@ import math
 
 from model import DurIAN
 from loss import DNNLoss
-from dataset import BufferDataset, collate_fn, DataLoader
+from dataset import BufferDataset, DataLoader
 from dataset import get_data_to_buffer, collate_fn_tensor
 from optimizer import ScheduledOptim
 import hparams as hp
