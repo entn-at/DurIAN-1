@@ -113,3 +113,4 @@ data/train.txt
 mels
 alignments
 waveglow/pretrained_model
+_sample
