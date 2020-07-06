@@ -69,4 +69,4 @@ if __name__ == "__main__":
         audio.tools.inv_mel_spec(
             mel, "results/"+str(args.step)+"_"+str(i)+".wav")
         waveglow.inference.inference(
-            mel_cuda, WaveGlow, "results/"+str(args.step)+"_"+str(i)+"waveglow.wav")
+            mel_cuda.transpose(1, 2), WaveGlow, "results/"+str(args.step)+"_"+str(i)+"waveglow.wav")
