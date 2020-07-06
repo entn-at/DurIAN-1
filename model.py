@@ -76,14 +76,6 @@ class DurIAN(nn.Module):
 
         return cell0, cell1
 
-        # cell2 = nn.GRUCell(self.decoder.hidden_size, self.decoder.hidden_size)
-        # cell2.weight_hh.data = self.decoder.weight_hh_l2.data
-        # cell2.weight_ih.data = self.decoder.weight_ih_l2.data
-        # cell2.bias_hh.data = self.decoder.bias_hh_l2.data
-        # cell2.bias_ih.data = self.decoder.bias_ih_l2.data
-
-        # return cell0, cell1, cell2
-
     def mask_tensor(self, mel_output, position, mel_max_length):
         lengths = torch.max(position, -1)[0]
         mask = ~utils.get_mask_from_lengths(lengths, max_len=mel_max_length)

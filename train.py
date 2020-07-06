@@ -9,9 +9,10 @@ import os
 import time
 import math
 
-from model import TTS
+from model import DurIAN
 from loss import DNNLoss
-from dataset import DNNDataset, collate_fn, DataLoader
+from dataset import BufferDataset, collate_fn, DataLoader
+from dataset import get_data_to_buffer, collate_fn_tensor
 from optimizer import ScheduledOptim
 import hparams as hp
 import utils
@@ -22,13 +23,11 @@ def main(args):
     device = torch.device('cuda'if torch.cuda.is_available()else 'cpu')
 
     # Define model
-    model = nn.DataParallel(TTS()).to(device)
+    print("Use DurIAN")
+    model = nn.DataParallel(DurIAN()).to(device)
     print("Model Has Been Defined")
     num_param = utils.get_param_num(model)
     print('Number of TTS Parameters:', num_param)
-
-    # Get dataset
-    dataset = DNNDataset()
 
     # Optimizer and loss
     optimizer = torch.optim.Adam(model.parameters(),
@@ -57,57 +56,64 @@ def main(args):
     if not os.path.exists(hp.logger_path):
         os.mkdir(hp.logger_path)
 
+    # Get buffer
+    buffer = get_data_to_buffer()
+
+    # Get dataset
+    dataset = BufferDataset(buffer)
+
+    # Get Training Loader
+    training_loader = DataLoader(dataset,
+                                 batch_size=hp.batch_expand_size * hp.batch_size,
+                                 shuffle=True,
+                                 collate_fn=collate_fn_tensor,
+                                 drop_last=True,
+                                 num_workers=0)
+    total_step = hp.epochs * len(training_loader) * hp.batch_expand_size
+
     # Define Some Information
     Time = np.array([])
-    Start = time.clock()
+    Start = time.perf_counter()
 
     # Training
     model = model.train()
 
     for epoch in range(hp.epochs):
-        # Get Training Loader
-        training_loader = DataLoader(dataset,
-                                     batch_size=hp.batch_size**2,
-                                     shuffle=True,
-                                     collate_fn=collate_fn,
-                                     drop_last=True,
-                                     num_workers=0)
-        total_step = hp.epochs * len(training_loader) * hp.batch_size
-
         for i, batchs in enumerate(training_loader):
+            # print("load {:d} batchs.".format(len(batchs)))
+            # real batch start here
             for j, db in enumerate(batchs):
-                start_time = time.clock()
+                start_time = time.perf_counter()
 
-                current_step = i * hp.batch_size + j + args.restore_step + \
-                    epoch * len(training_loader) * hp.batch_size + 1
+                current_step = i * hp.batch_expand_size + j + args.restore_step + \
+                    epoch * len(training_loader) * hp.batch_expand_size + 1
 
                 # Init
                 scheduled_optim.zero_grad()
 
                 # Get Data
-                character = torch.from_numpy(db["text"]).long().to(device)
-                mel_target = torch.from_numpy(db["mel_target"])
-                mel_target = mel_target.float().to(device)
-                prev_mel = F.pad(mel_target, (0, 0, 1, 0, 0, 0))[:, :-1, :]
-                D = torch.from_numpy(db["duration"]).int().to(device)
-                mel_pos = torch.from_numpy(db["mel_pos"]).long().to(device)
-                src_pos = torch.from_numpy(db["src_pos"]).long().to(device)
+                character = db["text"].long().to(device)
+                mel_target = db["mel_target"].float().to(device)
+                duration = db["duration"].int().to(device)
+                mel_pos = db["mel_pos"].long().to(device)
+                src_pos = db["src_pos"].long().to(device)
                 max_mel_len = db["mel_max_len"]
 
                 # Forward
                 mel_output, mel_postnet_output, duration_predictor_output = model(character,
                                                                                   src_pos,
-                                                                                  prev_mel=prev_mel,
+                                                                                  prev_mel=mel_target,
                                                                                   mel_pos=mel_pos,
                                                                                   mel_max_length=max_mel_len,
-                                                                                  length_target=D)
+                                                                                  length_target=duration,
+                                                                                  epoch=epoch)
 
                 # Cal Loss
                 mel_loss, mel_postnet_loss, duration_loss = fastspeech_loss(mel_output,
                                                                             mel_postnet_output,
                                                                             duration_predictor_output,
                                                                             mel_target,
-                                                                            D)
+                                                                            duration)
                 total_loss = mel_loss + mel_postnet_loss + duration_loss
 
                 # Logger
@@ -144,7 +150,7 @@ def main(args):
 
                 # Print
                 if current_step % hp.log_step == 0:
-                    Now = time.clock()
+                    Now = time.perf_counter()
 
                     str1 = "Epoch [{}/{}], Step [{}/{}]:".format(
                         epoch+1, hp.epochs, current_step, total_step)
@@ -172,7 +178,7 @@ def main(args):
                     )}, os.path.join(hp.checkpoint_path, 'checkpoint_%d.pth.tar' % current_step))
                     print("save model at step %d ..." % current_step)
 
-                end_time = time.clock()
+                end_time = time.perf_counter()
                 Time = np.append(Time, end_time - start_time)
                 if len(Time) == hp.clear_Time:
                     temp_value = np.mean(Time)
