@@ -9,9 +9,11 @@ import os
 
 import hparams as hp
 import audio
+import utils
 import dataset
 import text
 import model as M
+import waveglow
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -50,6 +52,10 @@ def get_data():
 
 
 if __name__ == "__main__":
+    # TEST
+    WaveGlow = utils.get_WaveGlow()
+    waveglow.inference.inference(torch.randn(1, 80, 500), WaveGlow, "test.wav")
+
     # Test
     parser = argparse.ArgumentParser()
     parser.add_argument('--step', type=int, default=0)

@@ -44,16 +44,6 @@ def get_WaveGlow():
     return wave_glow
 
 
-def get_D(alignment):
-    D = np.array([0 for _ in range(np.shape(alignment)[1])])
-
-    for i in range(np.shape(alignment)[0]):
-        max_index = alignment[i].tolist().index(alignment[i].max())
-        D[max_index] = D[max_index] + 1
-
-    return D
-
-
 def pad_1D(inputs, PAD=0):
 
     def pad_data(x, length, PAD):
