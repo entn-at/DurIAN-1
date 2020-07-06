@@ -37,7 +37,7 @@ def synthesis(model, text, alpha=1.0):
 
     with torch.no_grad():
         _, mel = model.module.forward(sequence, src_pos, alpha=alpha)
-    return mel[0].cpu().transpose(0, 1), mel
+    return mel[0].cpu().transpose(0, 1), mel.contiguous().transpose(1, 2)
 
 
 def get_data():
@@ -69,6 +69,6 @@ if __name__ == "__main__":
         audio.tools.inv_mel_spec(
             mel, "results/"+str(args.step)+"_"+str(i)+".wav")
         waveglow.inference.inference(
-            mel_cuda.transpose(1, 2), WaveGlow,
+            mel_cuda, WaveGlow,
             "results/"+str(args.step)+"_"+str(i)+"_waveglow.wav")
         print("Done", i + 1)
