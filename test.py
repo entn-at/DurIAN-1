@@ -41,9 +41,11 @@ def synthesis(model, text, alpha=1.0):
 def get_data():
     test1 = "I am very happy to see you again!"
     test2 = "Durian model is a very good speech synthesis!"
+    test3 = "The traditional holidays in our house when I was a child were spent timing elaborate meals around football games."
     data_list = list()
     data_list.append(text.text_to_sequence(test1, hp.text_cleaners))
     data_list.append(text.text_to_sequence(test2, hp.text_cleaners))
+    data_list.append(text.text_to_sequence(test3, hp.text_cleaners))
     return data_list
 
 

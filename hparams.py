@@ -20,7 +20,6 @@ decoder_n_layer = 2
 
 duration_predictor_filter_size = 256
 duration_predictor_kernel_size = 3
-num_position = 3000
 
 probability = 0.5
 dropout = 0.1
@@ -28,10 +27,6 @@ dropout = 0.1
 fft_conv1d_kernel = 3
 fft_conv1d_padding = 1
 ref_enc_filters = [32, 32, 64, 64, 128, 128]
-
-num_heads = 8
-token_num = 3
-style_dim = 256
 
 
 # Train
