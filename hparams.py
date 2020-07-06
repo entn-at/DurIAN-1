@@ -40,7 +40,7 @@ logger_path = "./logger"
 mel_ground_truth = "./mels"
 alignment_path = "./alignments"
 
-batch_size = 64
+batch_size = 32
 epochs = 2000
 n_warm_up_step = 4000
 
