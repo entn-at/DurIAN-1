@@ -71,3 +71,4 @@ if __name__ == "__main__":
         waveglow.inference.inference(
             mel_cuda.transpose(1, 2), WaveGlow,
             "results/"+str(args.step)+"_"+str(i)+"_waveglow.wav")
+        print("Done", i + 1)
