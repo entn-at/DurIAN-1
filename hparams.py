@@ -21,7 +21,6 @@ decoder_n_layer = 2
 duration_predictor_filter_size = 256
 duration_predictor_kernel_size = 3
 
-probability = 0.5
 dropout = 0.1
 
 fft_conv1d_kernel = 3
