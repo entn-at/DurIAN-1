@@ -43,7 +43,7 @@ def synthesis(model, text, alpha=1.0):
 def get_data():
     test1 = "I am very happy to see you again!"
     test2 = "Durian model is a very good speech synthesis!"
-    test3 = "The traditional holidays in our house when I was a child were spent timing elaborate meals around football games."
+    test3 = "When I was twenty, I fell in love with a girl."
     data_list = list()
     data_list.append(text.text_to_sequence(test1, hp.text_cleaners))
     data_list.append(text.text_to_sequence(test2, hp.text_cleaners))
@@ -69,4 +69,5 @@ if __name__ == "__main__":
         audio.tools.inv_mel_spec(
             mel, "results/"+str(args.step)+"_"+str(i)+".wav")
         waveglow.inference.inference(
-            mel_cuda.transpose(1, 2), WaveGlow, "results/"+str(args.step)+"_"+str(i)+"waveglow.wav")
+            mel_cuda.transpose(1, 2), WaveGlow,
+            "results/"+str(args.step)+"_"+str(i)+"_waveglow.wav")
