@@ -37,7 +37,7 @@ def synthesis(model, text, alpha=1.0):
 
     with torch.no_grad():
         _, mel = model.module.forward(sequence, src_pos, alpha=alpha)
-    return mel[0].cpu().transpose(0, 1)
+    return mel[0].cpu().transpose(0, 1), mel
 
 
 def get_data():
@@ -52,11 +52,8 @@ def get_data():
 
 
 if __name__ == "__main__":
-    # TEST
-    WaveGlow = utils.get_WaveGlow()
-    waveglow.inference.inference(torch.randn(1, 80, 500), WaveGlow, "test.wav")
-
     # Test
+    WaveGlow = utils.get_WaveGlow()
     parser = argparse.ArgumentParser()
     parser.add_argument('--step', type=int, default=0)
     parser.add_argument("--alpha", type=float, default=1.0)
@@ -66,8 +63,10 @@ if __name__ == "__main__":
     model = get_DNN(args.step)
     data_list = get_data()
     for i, phn in enumerate(data_list):
-        mel = synthesis(model, phn, args.alpha)
+        mel, mel_cuda = synthesis(model, phn, args.alpha)
         if not os.path.exists("results"):
             os.mkdir("results")
         audio.tools.inv_mel_spec(
             mel, "results/"+str(args.step)+"_"+str(i)+".wav")
+        waveglow.inference.inference(
+            mel_cuda, WaveGlow, "results/"+str(args.step)+"_"+str(i)+"waveglow.wav")
