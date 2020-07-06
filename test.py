@@ -59,7 +59,7 @@ if __name__ == "__main__":
     parser.add_argument("--alpha", type=float, default=1.0)
     args = parser.parse_args()
 
-    print("use griffin lim")
+    print("use griffin-lim and waveglow")
     model = get_DNN(args.step)
     data_list = get_data()
     for i, phn in enumerate(data_list):
