@@ -112,4 +112,4 @@ data/train.txt
 
 mels
 alignments
-gen.py
+waveglow/pretrained_model
