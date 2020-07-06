@@ -22,4 +22,3 @@ training:
 testing:
 1. Put [Nvidia pretrained waveglow model](https://drive.google.com/file/d/1WsibBTsuRg_SF2Z6L6NFRTT-NjEy1oTx/view?usp=sharing) in the `waveglow/pretrained_model`
 2. `CUDA_VISIBLE_DEVICES=0 python3 test.py --step [step-of-checkpoint]`
-
