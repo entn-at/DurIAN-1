@@ -23,8 +23,7 @@ def build_from_path(in_dir, out_dir):
 
 def _process_utterance(out_dir, index, wav_path, text):
     # Compute a mel-scale spectrogram from the wav:
-    wav = audio.load_wav(wav_path)
-    mel_spectrogram = audio.melspectrogram(wav).astype(np.float32)
+    mel_spectrogram = audio.tools.get_mel(wav_path).numpy().astype(np.float32)
 
     # Write the spectrograms to disk:
     mel_filename = 'ljspeech-mel-%05d.npy' % index
